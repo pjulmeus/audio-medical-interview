@@ -2,13 +2,11 @@ import { initializeApp } from "firebase/app";
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDTWWtjtFUxhMOpXVgE7CSdF4OnzqO1V9c",
-  authDomain: "fir-medical-assistant-d0e73.firebaseapp.com",
-  projectId: "fir-medical-assistant-d0e73",
-  storageBucket: "fir-medical-assistant-d0e73.appspot.com",
-  messagingSenderId: "947948487702",
-  appId: "1:947948487702:web:6633c5df868922eccc2137",
-  measurementId: "G-3DWT0WBRNL"
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);

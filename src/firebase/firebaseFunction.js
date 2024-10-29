@@ -1,16 +1,31 @@
-const functions = require("firebase-functions");
-const admin = require("firebase-admin");
-admin.initializeApp();
+import { ref, getDownloadURL, uploadString } from "firebase/storage";
+import {storage} from "./firebaseConfig"
 
-exports.getFile = functions.https.onRequest((req, res) => {
-    const bucket = admin.storage().bucket();
-    const file = bucket.file("path/to/medical-info.txt");
+const uploadTextFile = async (question, text, fileName) => {
+    try {
+        const storageRef = ref(storage, fileName);
 
-    file.download().then((data) => {
-        const content = data[0];
-        res.set("Access-Control-Allow-Origin", "*"); // Adjust this to your specific domain in production
-        res.send(content.toString());
-    }).catch((error) => {
-        res.status(500).send(error);
-    });
-});
+        // Get current content of the file (if it exists)
+        let currentContent = '';
+        try {
+            const fileUrl = await getDownloadURL(storageRef);
+            const response = await fetch(fileUrl);
+            currentContent = await response.text();
+        } catch (error) {
+            console.log("File not found, creating a new one.");
+        }
+
+        // Append the new text to the current content
+        const updateText = `${currentContent}\n${question}: ${text}`;
+
+        // Upload the updated text content back to Firebase Storage
+        await uploadString(storageRef, updateText, 'raw', { contentType: 'text/plain' });
+
+        console.log("Text file uploaded and updated successfully!");
+    } catch (error) {
+        console.error("Error uploading text file:", error);
+        
+    }
+};
+
+export default uploadTextFile;

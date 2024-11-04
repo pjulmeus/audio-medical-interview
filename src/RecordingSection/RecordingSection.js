@@ -4,6 +4,8 @@ import QuestionFinder from "../questionFunction/QuestionDecipher";
 import OpenAI from "openai";
 import readTextFileFromFirebase from "../firebase/FirebaseStorage";
 import uploadTextFile from "../firebase/firebaseFunction";
+import Button from 'react-bootstrap/Button';
+import "./recording.css"
 
 // Initialize OpenAI client with API key directly
 const openai = new OpenAI({
@@ -23,7 +25,7 @@ const RecordingSection = () => {
   const [script, setScript] = useState('');
   const [error, setError] = useState(null);
   const [openAiResponse, setOpenAiResponse] = useState('');
-  const fileName = "fir-medical-assistant-d0e73.appspot.com/medical-info.txt"; 
+  const fileName = process.env.REACT_APP_FIREBASE_FILE_NAME; 
 
   const fetchOpenAiResponse = async (question) => {
     try {
@@ -58,10 +60,10 @@ const RecordingSection = () => {
 
   const stopTranscript = async () => {
     SpeechRecognition.stopListening();
-    const question = QuestionFinder(transcript);
-    setScript(question);
 
     try {
+      const question = QuestionFinder(transcript);
+      setScript(question);
       // Read the file from Firebase to check for an answer
       const answer = await readTextFileFromFirebase(question, fileName);
       
@@ -71,7 +73,7 @@ const RecordingSection = () => {
         // Fetch from OpenAI and then upload to Firebase
         fetchOpenAiResponse(question)
           .then(openAiAnswer => {
-            if (openAiAnswer) {
+            if (openAiAnswer && question) {
               setOpenAiResponse(openAiAnswer); // Set the OpenAI response
               return uploadTextFile(question, openAiAnswer, fileName); // Upload the response
             }
@@ -87,18 +89,26 @@ const RecordingSection = () => {
     }
   };
 
+  const restartProgram = () => {
+    resetTranscript()
+    setScript("")
+    setOpenAiResponse("")
+    setError("")
+  }
+
   return (
-    <div>
+    <div className="left">
       <p>Microphone: {listening ? 'on' : 'off'}</p>
-      <button onClick={SpeechRecognition.startListening}>Start</button>
-      <button onClick={stopTranscript}>Stop</button>
-      <button onClick={resetTranscript}>Reset</button>
-      <p>{error}</p>
-      <p>{transcript}</p>
-      <h3>Detected Questions</h3>
-      <h4>Question: {script}</h4>
-      <h3>Answer:</h3>
-      <p>{openAiResponse}</p>
+      <div className="btn-class">
+      <Button onClick={SpeechRecognition.startListening}>Start Microphone</Button>
+      <Button variant="danger" onClick={stopTranscript}>Stop Microphone</Button>
+      <Button onClick={restartProgram}>Reset</Button>
+      </div>
+      <h3>{error}</h3>
+      <h3>{transcript}</h3>
+      <h3>Detected Questions:</h3>
+      <h3>Question: {script}</h3>
+      <h3>Answer:{openAiResponse}</h3>
     </div>
   );
 };

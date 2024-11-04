@@ -1,0 +1,9 @@
+.left {
+    text-align: left;
+}
+
+.btn-class {
+    display: flex;
+    justify-content: flex-start;
+    gap: 1vh;
+}

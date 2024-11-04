@@ -33,7 +33,7 @@ function QuestionFinder(transcript) {
         
     } catch (error) {
         console.error("An error occurred:", error.message);
-        return [];
+        return false;
     }
 }
 export default QuestionFinder
